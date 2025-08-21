@@ -1,0 +1,42 @@
+-- PersonalityProfileEntity.sq
+
+-- DO NOT include DROP TABLE statements in creation schemas.
+-- This file should only contain the CREATE TABLE statement and queries.
+
+CREATE TABLE personalityProfileEntity (
+    id TEXT NOT NULL PRIMARY KEY,
+    echoId TEXT NOT NULL UNIQUE,
+    sourceChatFileName TEXT NOT NULL,
+
+    -- Core Identity fields
+    identityName TEXT NOT NULL,
+    relationshipToUser TEXT NOT NULL,
+    dailyLifeSummary TEXT NOT NULL,
+
+    -- Communication Rules fields
+    avgMessageLength TEXT NOT NULL,
+    tone TEXT NOT NULL,
+    capitalizationStyle TEXT NOT NULL,
+    punctuationStyle TEXT NOT NULL,
+    emojiFrequency TEXT NOT NULL,
+
+    -- Lexicon fields (stored as comma-separated strings)
+    signaturePhrases TEXT NOT NULL,
+    termsOfEndearment TEXT NOT NULL,
+    topEmojis TEXT NOT NULL
+);
+
+getProfileForEcho:
+SELECT * FROM personalityProfileEntity WHERE echoId = ?;
+
+insert:
+INSERT OR REPLACE INTO personalityProfileEntity(
+    id, echoId, sourceChatFileName,
+    identityName, relationshipToUser, dailyLifeSummary,
+    avgMessageLength, tone, capitalizationStyle, punctuationStyle, emojiFrequency,
+    signaturePhrases, termsOfEndearment, topEmojis
+)
+VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
+
+deleteByEchoId:
+DELETE FROM personalityProfileEntity WHERE echoId = ?;

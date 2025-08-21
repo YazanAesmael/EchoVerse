@@ -1,0 +1,21 @@
+-- EchoEntity.sq
+
+CREATE TABLE echoEntity (
+    id TEXT NOT NULL PRIMARY KEY,
+    name TEXT NOT NULL,
+    profilePictureUri TEXT,
+    createdAt INTEGER NOT NULL
+);
+
+selectAll:
+SELECT * FROM echoEntity ORDER BY createdAt DESC;
+
+insert:
+INSERT OR REPLACE INTO echoEntity(id, name, profilePictureUri, createdAt)
+VALUES (?, ?, ?, ?);
+
+getById:
+SELECT * FROM echoEntity WHERE id = ?;
+
+deleteById:
+DELETE FROM echoEntity WHERE id = ?;

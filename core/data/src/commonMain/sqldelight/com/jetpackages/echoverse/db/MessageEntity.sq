@@ -1,0 +1,24 @@
+-- MessageEntity.sq
+
+import kotlin.Boolean;
+
+CREATE TABLE messageEntity (
+    id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+    echoId TEXT NOT NULL,
+    text TEXT NOT NULL,
+    isFromUser INTEGER AS Boolean NOT NULL,
+    timestamp INTEGER NOT NULL
+);
+
+-- Get all messages for a specific Echo, ordered by time
+getHistoryForEcho:
+SELECT * FROM messageEntity WHERE echoId = ? ORDER BY timestamp ASC;
+
+-- Insert a new message
+insert:
+INSERT INTO messageEntity(echoId, text, isFromUser, timestamp)
+VALUES (?, ?, ?, ?);
+
+-- (Optional but good for cleanup) Delete all messages for an Echo when it's deleted
+deleteHistoryForEcho:
+DELETE FROM messageEntity WHERE echoId = ?;

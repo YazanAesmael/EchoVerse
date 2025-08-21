@@ -1,0 +1,22 @@
+-- MemoryFragmentEntity.sq
+
+-- A table to store individual memories or conversation snippets for an Echo.
+CREATE TABLE memoryFragmentEntity (
+    id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+    echoId TEXT NOT NULL,
+    content TEXT NOT NULL,
+    timestamp INTEGER NOT NULL
+);
+
+-- Get all memories for a specific Echo
+getAllForEcho:
+SELECT * FROM memoryFragmentEntity WHERE echoId = ? ORDER BY timestamp DESC;
+
+-- Insert a new memory fragment
+insert:
+INSERT INTO memoryFragmentEntity(echoId, content, timestamp)
+VALUES (?, ?, ?);
+
+-- Clean up memories when an Echo is deleted
+deleteForEcho:
+DELETE FROM memoryFragmentEntity WHERE echoId = ?;

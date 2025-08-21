@@ -1,0 +1,88 @@
+# In gradle/libs.versions.toml
+
+[versions]
+# --- Project (From your working example) ---
+agp = "8.3.2"
+kotlin = "2.0.20"
+android-compileSdk = "35"
+android-minSdk = "26"
+android-targetSdk = "35"
+
+# --- Compose (From your working example) ---
+compose-plugin = "1.7.0-beta02" # This is the Jetbrains Compose Multiplatform plugin
+androidx-activityCompose = "1.9.2"
+material3-window-size = "1.3.0"
+
+# --- KMM Libs (Merged from your example and our needs) ---
+kotlinx-serialization = "1.6.3" # Updated from your example
+kotlinx-datetime = "0.6.0"
+kotlinx-coroutines = "1.8.1"
+koin = "3.5.6"
+koin-compose = "1.1.5"
+sqlDelight = "2.0.2"
+ktor = "2.3.12"
+decompose = "3.3.0" # Your version was newer and better
+
+# --- KOOG (UNCHANGED as requested) ---
+koog = "0.1.0"
+koogAgents = "0.2.1.41"
+agentsCore = "0.2.1.41"
+
+[libraries]
+# --- Kotlin ---
+kotlinx-coroutines-core = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref = "kotlinx-coroutines" }
+kotlinx-datetime = { module = "org.jetbrains.kotlinx:kotlinx-datetime", version.ref = "kotlinx-datetime" }
+kotlinx-serialization-core = { module = "org.jetbrains.kotlinx:kotlinx-serialization-core", version.ref = "kotlinx-serialization" }
+kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "kotlinx-serialization" }
+
+# --- Dependency Injection ---
+koin-core = { module = "io.insert-koin:koin-core", version.ref = "koin" }
+koin-android = { module = "io.insert-koin:koin-android", version.ref = "koin" }
+koin-compose = { module = "io.insert-koin:koin-compose", version.ref = "koin-compose" }
+
+# --- Android / UI ---
+androidx-activity-compose = { module = "androidx.activity:activity-compose", version.ref = "androidx-activityCompose" }
+compose-ui = { module = "org.jetbrains.compose.ui:ui", version.ref = "compose-plugin" }
+compose-foundation = { module = "org.jetbrains.compose.foundation:foundation", version.ref = "compose-plugin" }
+compose-material3 = { module = "org.jetbrains.compose.material3:material3", version.ref = "compose-plugin" }
+compose-material-icons-extended = { module = "org.jetbrains.compose.material:material-icons-extended", version.ref = "compose-plugin" }
+compose-ui-tooling-preview = { module = "org.jetbrains.compose.ui:ui-tooling-preview", version.ref = "compose-plugin" }
+
+# --- Decompose for Navigation ---
+decompose-core = { module = "com.arkivanov.decompose:decompose", version.ref = "decompose" }
+decompose-compose = { module = "com.arkivanov.decompose:extensions-compose", version.ref = "decompose" }
+
+# --- Database ---
+sqlDelight-runtime = { module = "app.cash.sqldelight:runtime", version.ref = "sqlDelight" }
+sqlDelight-coroutines-extensions = { module = "app.cash.sqldelight:coroutines-extensions", version.ref = "sqlDelight" }
+sqlDelight-android-driver = { module = "app.cash.sqldelight:android-driver", version.ref = "sqlDelight" }
+sqlDelight-native-driver = { module = "app.cash.sqldelight:native-driver", version.ref = "sqlDelight" }
+
+# --- Network ---
+ktor-client-core = { module = "io.ktor:ktor-client-core", version.ref = "ktor" }
+ktor-client-content-negotiation = { module = "io.ktor:ktor-client-content-negotiation", version.ref = "ktor" }
+ktor-serialization-kotlinx-json = { module = "io.ktor:ktor-serialization-kotlinx-json", version.ref = "ktor" }
+ktor-client-cio = { module = "io.ktor:ktor-client-cio", version.ref = "ktor" } # JVM engine
+ktor-client-darwin = { module = "io.ktor:ktor-client-darwin", version.ref = "ktor" } # iOS engine
+
+# --- Koog for AI Agents (UNCHANGED as requested) ---
+agents-core = { module = "ai.koog:agents-core", version.ref = "agentsCore" }
+agents-tools = { module = "ai.koog:agents-tools", version.ref = "agentsCore" }
+prompt-structure = { module = "ai.koog:prompt-structure", version.ref = "agentsCore" }
+agents-utils = { module = "ai.koog:agents-utils", version.ref = "agentsCore" }
+agents-features-common = { module = "ai.koog:agents-features-common", version.ref = "agentsCore" }
+agents-features-tokenizer = { module = "ai.koog:agents-features-tokenizer", version.ref = "agentsCore" }
+koog-agents = { module = "ai.koog:koog-agents", version.ref = "koogAgents" }
+koog-prompt = { module = "ai.koog:prompt-executor-google-client", version.ref = "koog" }
+koog-agents-jvm = { module = "ai.koog:koog-agents-jvm", version.ref = "koogAgents" }
+koog-google-client-jvm = { module = "ai.koog:prompt-executor-google-client-jvm", version.ref = "koog" }
+
+[plugins]
+androidApplication = { id = "com.android.application", version.ref = "agp" }
+androidLibrary = { id = "com.android.library", version.ref = "agp" }
+kotlinMultiplatform = { id = "org.jetbrains.kotlin.multiplatform", version.ref = "kotlin" }
+kotlinSerialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
+kotlinAndroid = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
+compose-multiplatform = { id = "org.jetbrains.compose", version.ref = "compose-plugin" }
+compose-compiler = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
+sqlDelight = { id = "app.cash.sqldelight", version.ref = "sqlDelight" }
