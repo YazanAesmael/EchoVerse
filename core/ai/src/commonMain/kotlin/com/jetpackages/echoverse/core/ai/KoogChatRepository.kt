@@ -3,6 +3,7 @@ package com.jetpackages.echoverse.core.ai
 import ai.koog.prompt.dsl.prompt
 import ai.koog.prompt.executor.clients.google.GoogleModels
 import ai.koog.prompt.executor.model.PromptExecutor
+import ai.koog.prompt.executor.model.PromptExecutorExt.execute
 import com.jetpackages.echoverse.core.ai.cognitive.EmotionalAnalyzerTool
 import com.jetpackages.echoverse.core.ai.cognitive.StyleAdvisorTool
 import com.jetpackages.echoverse.core.domain.util.randomFloat
@@ -11,6 +12,7 @@ import kotlinx.datetime.Clock
 import model.Message
 import model.PersonalityProfile
 import repository.ChatRepository
+import repository.ConversationArchive
 import usecase.RetrieveMemoriesUseCase
 
 /**
@@ -19,9 +21,7 @@ import usecase.RetrieveMemoriesUseCase
  */
 class KoogChatRepository(
     private val geminiExecutor: PromptExecutor,
-    private val retrieveMemoriesUseCase: RetrieveMemoriesUseCase,
-    private val emotionalAnalyzer: EmotionalAnalyzerTool,
-    private val styleAdvisor: StyleAdvisorTool
+    private val conversationArchive: ConversationArchive
 ) : ChatRepository {
 
     override suspend fun getReply(
@@ -29,40 +29,33 @@ class KoogChatRepository(
         history: List<Message>,
         userMessage: String
     ): Message {
-        Napier.d(tag = "CognitiveFunnel") { "--- NEW MESSAGE ---" }
-        Napier.d(tag = "CognitiveFunnel") { "User Input: '$userMessage'" }
+        Napier.d(tag = "ExemplarEngine") { "--- NEW MESSAGE ---" }
+        Napier.d(tag = "ExemplarEngine") { "User Input: '$userMessage'" }
 
-        // 1a. Analyze Emotion
-        val lastFewMessages = (history.takeLast(2).map {
-            "${if(it.isFromUser) "User" else profile.coreIdentity.name}: ${it.text}"
-        } + "User: $userMessage").joinToString("\n")
-        val emotionAnalysis = emotionalAnalyzer.analyze(lastFewMessages)
-        Napier.d(tag = "CognitiveFunnel") { "Step 1a | Emotion Analysis: $emotionAnalysis" }
-
-        // 1b. Retrieve Long-Term Memory (RAG)
-        val allMemories = retrieveMemoriesUseCase(profile.echoId)
-        val relevantMemories = findRelevantMemories(userMessage, allMemories)
-        Napier.d(tag = "CognitiveFunnel") { "Step 1b | Relevant Memories Retrieved:\n$relevantMemories" }
-
-        // 1c. Get Stylistic Advice for this specific turn.
-        val styleAdvice = styleAdvisor.advise(profile)
-        Napier.d(tag = "CognitiveFunnel") { "Step 1c | Style Advice: $styleAdvice" }
+        // --- STEP 1: RETRIEVE EXEMPLARS (The new RAG) ---
+        val fullArchive = conversationArchive.retrieveAll(profile.echoId)
+        val exemplars = findExemplars(
+            userQuery = userMessage,
+            conversationArchive = fullArchive,
+            personNameToFind = profile.coreIdentity.name
+        )
+        Napier.d(tag = "ExemplarEngine") { "Step 1 | Retrieved Exemplars:\n$exemplars" }
 
         // --- STEP 2: DYNAMIC PROMPT ASSEMBLY ---
         val dynamicSystemPrompt = buildString {
-            appendLine("You are an AI emulating '${profile.coreIdentity.name}'. You MUST adopt their personality and communication style. Your goal is a natural, in-character response.")
-            appendLine("\n### BRIEFING FOR THIS REPLY:")
-            appendLine("- The user's current mood seems: ${emotionAnalysis.mood} (Urgency: ${emotionAnalysis.urgency})")
-            appendLine("- Your stylistic advice is: Tone should be '${styleAdvice.tone}'. Length should be '${styleAdvice.length}'.")
+            appendLine("You are an AI emulating '${profile.coreIdentity.name}'. Your PRIMARY GOAL is to reply to the user's message in a way that is consistent with the provided EXEMPLARS. The exemplars are real examples of how '${profile.coreIdentity.name}' talks. Match their tone, length, vocabulary, and emoji usage as closely as possible.")
+            appendLine("\n### HIGH-LEVEL PERSONA (Static DNA):")
+            appendLine("- Your relationship to the user is: ${profile.coreIdentity.relationshipToUser}")
+            appendLine("- Your primary tone is: ${profile.communicationRules.tone}")
 
-            if (relevantMemories.isNotBlank()) {
-                appendLine("\n### RELEVANT MEMORIES (FOR CONTEXT):")
-                appendLine("Subtly weave information from these past conversations into your reply if it feels natural. DO NOT explicitly say 'I remember when...'.")
-                append(relevantMemories)
+            if (exemplars.isNotBlank()) {
+                appendLine("\n### EXEMPLARS FOR THIS REPLY (Learn from these):")
+                append(exemplars)
             }
         }
+        Napier.d(tag = "ExemplarEngine") { "Step 2 | Final System Prompt:\n$dynamicSystemPrompt" }
 
-        val conversationalPrompt = prompt("cognitive-chat-prompt") {
+        val conversationalPrompt = prompt("exemplar-chat-prompt") {
             system(dynamicSystemPrompt)
             history.takeLast(10).forEach { message ->
                 if (message.isFromUser) user(message.text) else assistant(message.text)
@@ -70,71 +63,52 @@ class KoogChatRepository(
             user(userMessage)
         }
 
-        Napier.d(tag = "CognitiveFunnel") { "Step 2 | Final System Prompt:\n$dynamicSystemPrompt" }
-
         // --- STEP 3: GENERATE RESPONSE ---
-        var aiText = geminiExecutor.execute(
+        val aiText = geminiExecutor.execute(
             prompt = conversationalPrompt,
-            model = GoogleModels.Gemini1_5ProLatest,
+            model = mainModel,
             tools = emptyList()
-        ).getOrNull(0)?.content ?: "No Content"
-
-        Napier.d(tag = "CognitiveFunnel") { "Step 3 | Raw AI Response: '$aiText'" }
-
-        // --- STEP 4: PROBABILISTIC DECISION (CORRECTED LOGGING) ---
-        val emojiRoll = randomFloat()
-        // This regex is a standard way to detect most common emojis.
-        val emojiRegex = Regex("\\p{So}")
-        // Check if the AI's raw response contains ANY emoji.
-        val alreadyHasEmoji = emojiRegex.containsMatchIn(aiText)
-
-        if (!alreadyHasEmoji && emojiRoll < styleAdvice.emojiProbability && profile.lexicon.topEmojis.isNotEmpty()) {
-            val emojiToAdd = profile.lexicon.topEmojis.random()
-            aiText += " $emojiToAdd"
-            Napier.d(tag = "CognitiveFunnel") { "Step 4 | Emoji check PASSED (rolled $emojiRoll < ${styleAdvice.emojiProbability} AND no emoji present). Added: $emojiToAdd" }
-        } else {
-            val reason = if (alreadyHasEmoji) "AI already added one" else "rolled $emojiRoll >= ${styleAdvice.emojiProbability}"
-            Napier.d(tag = "CognitiveFunnel") { "Step 4 | Emoji check SKIPPED ($reason)." }
-        }
+        ).getOrNull(0)?.content ?: ""
+        Napier.d(tag = "ExemplarEngine") { "Step 3 | Final AI Response: '$aiText'" }
 
         return Message(
-            text = aiText,
+            text = aiText.trim(),
             isFromUser = false,
             timestamp = Clock.System.now().toEpochMilliseconds()
         )
     }
 
     /**
-     * A sub-agent that uses an LLM to perform a semantic search over the memory bank.
-     * This is the "Retrieval" part of RAG.
+     * The new "Exemplar Finder" sub-agent.
      */
-    private suspend fun findRelevantMemories(userQuery: String, memoryBank: List<String>): String {
-        if (memoryBank.isEmpty()) return ""
+    private suspend fun findExemplars(userQuery: String, conversationArchive: List<String>, personNameToFind: String): String {
+        if (conversationArchive.isEmpty()) return ""
 
-        val memoryList = memoryBank.joinToString("\n") { "- $it" }
+        val archiveSample = conversationArchive.take(50).joinToString("\n---\n")
 
         val systemPrompt = """
-            You are a relevance analysis AI. Your task is to select up to 3 of the most relevant
-            conversation snippets from the provided MEMORY BANK that are semantically related to the
-            CURRENT USER QUERY. Return only the selected snippets, each on a new line.
-            If no snippets are relevant, return an empty string.
+            You are a 'Dialogue Example Finder' AI. Your task is to search the provided CONVERSATION ARCHIVE. Find 2-3 of the best, most representative conversation snippets that show how '$personNameToFind' typically replies. The snippets should be semantically related to the CURRENT USER QUERY.
+
+            A good snippet contains the user's message and '$personNameToFind's' immediate reply.
+
+            Return ONLY the verbatim snippets, formatted exactly as they appear in the archive. If no relevant examples are found, return an empty string.
         """.trimIndent()
 
         val userPrompt = """
-            MEMORY BANK:
-            $memoryList
+            CONVERSATION ARCHIVE:
+            $archiveSample
 
             CURRENT USER QUERY:
             "$userQuery"
         """.trimIndent()
 
         return geminiExecutor.execute(
-            prompt = prompt("relevance-analysis") {
+            prompt = prompt("exemplar-finder") {
                 system(systemPrompt)
                 user(userPrompt)
             },
-            model = GoogleModels.Gemini1_5FlashLatest,
+            model = mainModel,
             tools = emptyList()
-        ).getOrNull(0)?.content ?: "No Content"
+        ).getOrNull(0)?.content ?: ""
     }
 }

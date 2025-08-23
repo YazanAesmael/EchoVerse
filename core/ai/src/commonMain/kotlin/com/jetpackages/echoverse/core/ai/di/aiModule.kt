@@ -9,12 +9,14 @@ import org.koin.dsl.module
 import repository.ChatAnalyzer
 import repository.ChatRepository
 
-const val GEMINI_API_KEY = "AIzaSyAvYQBwq3xHqbzCD7ineZHW5xRchmJrFk0"
+const val GEMINI_API_KEY = "AIzaSyDiAuLubCNOg6xMxDiFvlCMvRUopSkhmDg"
 
 val aiModule = module {
-    factory { EmotionalAnalyzerTool(geminiExecutor = simpleGoogleAIExecutor(GEMINI_API_KEY)) }
-    factory { StyleAdvisorTool(geminiExecutor = simpleGoogleAIExecutor(GEMINI_API_KEY)) }
+    val executor = simpleGoogleAIExecutor(GEMINI_API_KEY)
 
-    single<ChatAnalyzer> { KoogChatAnalyzer(geminiExecutor = simpleGoogleAIExecutor(GEMINI_API_KEY)) }
-    single<ChatRepository> { KoogChatRepository(geminiExecutor = simpleGoogleAIExecutor(GEMINI_API_KEY), get(), get(), get()) }
+    factory { EmotionalAnalyzerTool(geminiExecutor = executor) }
+    factory { StyleAdvisorTool(geminiExecutor = executor) }
+
+    single<ChatAnalyzer> { KoogChatAnalyzer(geminiExecutor = executor) }
+    single<ChatRepository> { KoogChatRepository(geminiExecutor = executor, get()) }
 }

@@ -92,6 +92,7 @@ class EchoRepositoryImpl(
             profileQueries.deleteByEchoId(id)
             db.messageEntityQueries.deleteHistoryForEcho(id)
             db.memoryFragmentEntityQueries.deleteForEcho(id)
+            db.conversationArchiveEntityQueries.deleteForEcho(id)
         }
     }
 }

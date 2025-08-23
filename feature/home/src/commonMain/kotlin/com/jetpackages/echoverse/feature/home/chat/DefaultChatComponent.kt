@@ -2,7 +2,6 @@ package com.jetpackages.echoverse.feature.home.chat
 
 import com.arkivanov.decompose.ComponentContext
 import com.arkivanov.essenty.lifecycle.doOnCreate
-import model.PersonalityProfile
 import com.jetpackages.echoverse.feature.home.chat.ui.ChatComponent
 import com.jetpackages.echoverse.feature.home.chat.ui.ChatState
 import kotlinx.coroutines.CoroutineScope
@@ -15,10 +14,10 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.datetime.Clock
 import model.Message
+import model.PersonalityProfile
 import usecase.GenerateReplyUseCase
 import usecase.GetEchoWithProfileUseCase
 import usecase.GetMessageHistoryUseCase
-import usecase.SaveMemoryUseCase
 import usecase.SaveMessageUseCase
 
 class DefaultChatComponent(
@@ -28,7 +27,6 @@ class DefaultChatComponent(
     private val generateReplyUseCase: GenerateReplyUseCase,
     private val getMessageHistoryUseCase: GetMessageHistoryUseCase,
     private val saveMessageUseCase: SaveMessageUseCase,
-    private val saveMemoryUseCase: SaveMemoryUseCase,
     private val onBack: () -> Unit
 ) : ChatComponent, ComponentContext by componentContext {
 
@@ -48,9 +46,7 @@ class DefaultChatComponent(
                 }
             }
 
-            // --- LOAD THE CHAT HISTORY ---
             // Start observing the message history from the database.
-            // The UI will automatically update whenever the history changes.
             getMessageHistoryUseCase(echoId)
                 .onEach { history ->
                     _state.update { it.copy(messages = history) }
@@ -70,28 +66,24 @@ class DefaultChatComponent(
 
         val userMessage = Message(userInput, true, Clock.System.now().toEpochMilliseconds())
 
-        // Clear the input field immediately for a responsive feel
         _state.update { it.copy(currentInput = "") }
 
         componentScope.launch {
-            // 1. Save the user's message. The Flow will automatically update the UI.
+            // 1. Save the user's message.
             saveMessageUseCase(echoId, userMessage)
 
             // 2. Show the "typing" indicator.
             _state.update { it.copy(isEchoTyping = true) }
 
-            // 3. Generate a reply using the now-updated history.
+            // 3. Generate a reply using the new "Exemplar Engine".
             val reply = generateReplyUseCase(
                 profile = profile,
-                history = state.value.messages, // The Flow has already delivered the new user message
+                history = state.value.messages,
                 userMessage = userInput
             )
 
-            // 4. Save the AI's reply. The Flow will update the UI again.
+            // 4. Save the AI's reply.
             saveMessageUseCase(echoId, reply)
-
-            val memoryContent = "User: \"${userMessage.text}\"\n${profile.coreIdentity.name}: \"${reply.text}\""
-            saveMemoryUseCase(echoId, memoryContent)
 
             // 5. Hide the "typing" indicator.
             _state.update { it.copy(isEchoTyping = false) }

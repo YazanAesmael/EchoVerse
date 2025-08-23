@@ -79,7 +79,6 @@ class DefaultRootComponent(
             generateReplyUseCase = get(),
             getMessageHistoryUseCase = get(),
             saveMessageUseCase = get(),
-            saveMemoryUseCase = get(),
             onBack = { navigation.pop() }
         )
 

@@ -1,0 +1,18 @@
+-- ConversationArchiveEntity.sq
+
+CREATE TABLE conversationArchiveEntity (
+    id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+    echoId TEXT NOT NULL,
+    chunk TEXT NOT NULL, -- A chunk of the original conversation
+    timestamp INTEGER NOT NULL
+);
+
+getAllForEcho:
+SELECT chunk FROM conversationArchiveEntity WHERE echoId = ? ORDER BY id ASC;
+
+insert:
+INSERT INTO conversationArchiveEntity(echoId, chunk, timestamp)
+VALUES (?, ?, ?);
+
+deleteForEcho:
+DELETE FROM conversationArchiveEntity WHERE echoId = ?;

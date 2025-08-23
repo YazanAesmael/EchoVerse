@@ -11,10 +11,11 @@ import usecase.GetMessageHistoryUseCase
 import usecase.RetrieveMemoriesUseCase
 import usecase.SaveMemoryUseCase
 import usecase.SaveMessageUseCase
+import usecase.StoreConversationChunkUseCase
 
 val homeModule = module {
     factory { GetEchosUseCase(get()) }
-    factory { CreateEchoUseCase(get(), get()) }
+    factory { CreateEchoUseCase(get(), get(), get()) }
     factory { DeleteEchoUseCase(get()) }
     factory { ExtractParticipantsUseCase(get()) }
     factory { GetEchoWithProfileUseCase(get()) }
@@ -23,4 +24,5 @@ val homeModule = module {
     factory { SaveMessageUseCase(get()) }
     factory { SaveMemoryUseCase(get()) }
     factory { RetrieveMemoriesUseCase(get()) }
+    factory { StoreConversationChunkUseCase(get()) }
 }

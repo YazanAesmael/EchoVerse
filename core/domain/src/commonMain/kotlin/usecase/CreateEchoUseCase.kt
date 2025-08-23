@@ -1,6 +1,7 @@
 package usecase
 
 import repository.ChatAnalyzer
+import repository.ConversationArchive
 import repository.EchoRepository
 
 /**
@@ -9,7 +10,8 @@ import repository.EchoRepository
  */
 class CreateEchoUseCase(
     private val chatAnalyzer: ChatAnalyzer,
-    private val echoRepository: EchoRepository
+    private val echoRepository: EchoRepository,
+    private val conversationArchive: ConversationArchive
 ) {
     suspend operator fun invoke(
         chatContent: String,
@@ -18,18 +20,23 @@ class CreateEchoUseCase(
         profilePictureUri: String?,
         sourceChatFileName: String
     ) {
-        // 1. Let the AI synthesize the personality profile
+        // 1. Synthesize the static "DNA" profile.
         val personalityProfile = chatAnalyzer.synthesizeProfile(
             chatContent = chatContent,
             participantName = participantToEcho,
             sourceChatFileName = sourceChatFileName
         )
 
-        // 2. Use the repository to create and save the new Echo with the profile
-        echoRepository.createEcho(
+        // 2. Create the Echo to get its unique ID.
+        val newEcho = echoRepository.createEcho(
             name = echoName,
             profilePictureUri = profilePictureUri,
             personalityProfile = personalityProfile
         )
+
+        // 3. Ingest the entire chat log into the long-term archive.
+        chatContent.chunked(1000).forEach { chunk ->
+            conversationArchive.store(newEcho.id, chunk)
+        }
     }
 }
