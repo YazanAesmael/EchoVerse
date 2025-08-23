@@ -27,7 +27,12 @@ decompose = "3.3.0" # Your version was newer and better
 koog = "0.1.0"
 koogAgents = "0.2.1.41"
 agentsCore = "0.2.1.41"
+koog-embeddings = "0.2.1.41"
 
+# --- Vector DB ---
+voyager = "1.0.0-beta-12"
+
+# --- Logging ---
 napier = "2.7.1"
 
 [libraries]
@@ -77,7 +82,12 @@ koog-agents = { module = "ai.koog:koog-agents", version.ref = "koogAgents" }
 koog-prompt = { module = "ai.koog:prompt-executor-google-client", version.ref = "koog" }
 koog-agents-jvm = { module = "ai.koog:koog-agents-jvm", version.ref = "koogAgents" }
 koog-google-client-jvm = { module = "ai.koog:prompt-executor-google-client-jvm", version.ref = "koog" }
+koog-embeddings-llm = { module = "ai.koog:embeddings-llm", version.ref = "koog-embeddings" }
 
+# --- Vector DB ---
+voyager = { module = "io.github.benebsworth:voyager", version.ref = "voyager" }
+
+# --- Logging ---
 napier = { module = "io.github.aakira:napier", version.ref = "napier" }
 
 [plugins]

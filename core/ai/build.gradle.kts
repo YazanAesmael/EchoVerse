@@ -43,10 +43,12 @@ kotlin {
             implementation(libs.koog.agents)
             implementation(libs.koog.agents.jvm)
             implementation(libs.koog.google.client.jvm)
+            implementation(libs.koog.embeddings.llm)
 
             implementation(libs.koin.core)
 
             implementation(libs.napier) // logging
+
         }
     }
 }

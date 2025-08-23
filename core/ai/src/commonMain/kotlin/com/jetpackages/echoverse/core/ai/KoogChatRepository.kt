@@ -32,7 +32,6 @@ class KoogChatRepository(
         Napier.d(tag = "ExemplarEngine") { "--- NEW MESSAGE ---" }
         Napier.d(tag = "ExemplarEngine") { "User Input: '$userMessage'" }
 
-        // --- STEP 1: RETRIEVE EXEMPLARS (The new RAG) ---
         val fullArchive = conversationArchive.retrieveAll(profile.echoId)
         val exemplars = findExemplars(
             userQuery = userMessage,
@@ -41,7 +40,6 @@ class KoogChatRepository(
         )
         Napier.d(tag = "ExemplarEngine") { "Step 1 | Retrieved Exemplars:\n$exemplars" }
 
-        // --- STEP 2: DYNAMIC PROMPT ASSEMBLY ---
         val dynamicSystemPrompt = buildString {
             appendLine("You are an AI emulating '${profile.coreIdentity.name}'. Your PRIMARY GOAL is to reply to the user's message in a way that is consistent with the provided EXEMPLARS. The exemplars are real examples of how '${profile.coreIdentity.name}' talks. Match their tone, length, vocabulary, and emoji usage as closely as possible.")
             appendLine("\n### HIGH-LEVEL PERSONA (Static DNA):")
@@ -63,7 +61,6 @@ class KoogChatRepository(
             user(userMessage)
         }
 
-        // --- STEP 3: GENERATE RESPONSE ---
         val aiText = geminiExecutor.execute(
             prompt = conversationalPrompt,
             model = mainModel,
@@ -87,11 +84,13 @@ class KoogChatRepository(
         val archiveSample = conversationArchive.take(50).joinToString("\n---\n")
 
         val systemPrompt = """
-            You are a 'Dialogue Example Finder' AI. Your task is to search the provided CONVERSATION ARCHIVE. Find 2-3 of the best, most representative conversation snippets that show how '$personNameToFind' typically replies. The snippets should be semantically related to the CURRENT USER QUERY.
+            You are a highly advanced semantic search engine. Your task is to analyze a CURRENT USER QUERY and find the most relevant dialogue snippets from a large CONVERSATION ARCHIVE.
 
-            A good snippet contains the user's message and '$personNameToFind's' immediate reply.
-
-            Return ONLY the verbatim snippets, formatted exactly as they appear in the archive. If no relevant examples are found, return an empty string.
+            **Your Process:**
+            1.  **Analyze Intent:** Deeply understand the semantic meaning and emotional intent behind the CURRENT USER QUERY. Is it a question? A statement of feeling? A joke?
+            2.  **Semantic Search:** Scan the CONVERSATION ARCHIVE for snippets where '$personNameToFind' is responding to a similar query or emotional beat.
+            3.  **Select the Best:** Choose the top 2-3 snippets that are the best "exemplars" of how '$personNameToFind' would naturally react in this situation. A good exemplar includes both the other person's message and '$personNameToFind's' direct reply.
+            4.  **Output:** Return ONLY the selected verbatim snippets, separated by a '---' divider. If no relevant examples are found, return an empty string.
         """.trimIndent()
 
         val userPrompt = """
