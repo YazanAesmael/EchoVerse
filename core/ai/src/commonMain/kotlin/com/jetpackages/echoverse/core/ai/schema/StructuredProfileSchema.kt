@@ -27,26 +27,26 @@ data class CoreIdentitySchema(
     @property:LLMDescription("The analyzed relationship to the other chat participant (e.g., 'Loving partner', 'Close friend').")
     val relationshipToUser: String,
     
-    @property:LLMDescription("A brief summary of the person's daily life or key characteristics mentioned in the chat.")
+    @property:LLMDescription("A detailed summary of the person's daily life or key characteristics mentioned in the chat.")
     val dailyLifeSummary: String
 )
 
 @Serializable
 @SerialName("CommunicationRules")
 data class CommunicationRulesSchema(
-    @property:LLMDescription("A direct command describing the average message length (e.g., 'ALWAYS keep responses short, 1-10 words.').")
+    @property:LLMDescription("A description of the message length tendency (e.g., 'Tends to keep responses short, 1-10 words.').")
     val averageMessageLength: String,
 
-    @property:LLMDescription("A direct command describing the primary tone (e.g., 'DO be affectionate and playful.').")
+    @property:LLMDescription("A description of the primary tone (e.g., 'Primary tone is affectionate and playful.').")
     val tone: String,
 
-    @property:LLMDescription("A direct command describing the capitalization style (e.g., 'NEVER use capital letters.').")
+    @property:LLMDescription("A description of the capitalization style (e.g., 'Has a low tendency to use capital letters.').")
     val capitalizationStyle: String,
 
-    @property:LLMDescription("A direct command describing the punctuation style (e.g., 'Rarely use periods, prefer emojis.').")
+    @property:LLMDescription("A description of the punctuation style (e.g., 'Rarely uses periods.').")
     val punctuationStyle: String,
 
-    @property:LLMDescription("A direct command describing how often emojis are used (e.g., 'Use emojis in almost every message.').")
+    @property:LLMDescription("A description of how often emojis are used (e.g., 'Has a high tendency to use emojis, but not in every message.').")
     val emojiFrequency: String
 )
 

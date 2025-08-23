@@ -1,70 +1,101 @@
 package com.jetpackages.echoverse.core.ai
 
 import ai.koog.prompt.dsl.prompt
+import ai.koog.prompt.executor.clients.google.GoogleModels
 import ai.koog.prompt.executor.model.PromptExecutor
-import ai.koog.prompt.executor.model.PromptExecutorExt.execute
-import com.jetpackages.echoverse.core.domain.model.PersonalityProfile
+import com.jetpackages.echoverse.core.ai.cognitive.EmotionalAnalyzerTool
+import com.jetpackages.echoverse.core.ai.cognitive.StyleAdvisorTool
+import com.jetpackages.echoverse.core.domain.util.randomFloat
+import io.github.aakira.napier.Napier
 import kotlinx.datetime.Clock
 import model.Message
+import model.PersonalityProfile
 import repository.ChatRepository
 import usecase.RetrieveMemoriesUseCase
 
+/**
+ * A sophisticated chat repository that implements the "Cognitive Funnel" pattern.
+ * It orchestrates multiple AI tools to generate a highly contextual and nuanced reply.
+ */
 class KoogChatRepository(
     private val geminiExecutor: PromptExecutor,
-    private val retrieveMemoriesUseCase: RetrieveMemoriesUseCase
+    private val retrieveMemoriesUseCase: RetrieveMemoriesUseCase,
+    private val emotionalAnalyzer: EmotionalAnalyzerTool,
+    private val styleAdvisor: StyleAdvisorTool
 ) : ChatRepository {
+
     override suspend fun getReply(
         profile: PersonalityProfile,
         history: List<Message>,
         userMessage: String
     ): Message {
+        Napier.d(tag = "CognitiveFunnel") { "--- NEW MESSAGE ---" }
+        Napier.d(tag = "CognitiveFunnel") { "User Input: '$userMessage'" }
+
+        // 1a. Analyze Emotion
+        val lastFewMessages = (history.takeLast(2).map {
+            "${if(it.isFromUser) "User" else profile.coreIdentity.name}: ${it.text}"
+        } + "User: $userMessage").joinToString("\n")
+        val emotionAnalysis = emotionalAnalyzer.analyze(lastFewMessages)
+        Napier.d(tag = "CognitiveFunnel") { "Step 1a | Emotion Analysis: $emotionAnalysis" }
+
+        // 1b. Retrieve Long-Term Memory (RAG)
         val allMemories = retrieveMemoriesUseCase(profile.echoId)
-        val relevantMemories = findRelevantMemories(
-            userQuery = userMessage,
-            memoryBank = allMemories
-        )
+        val relevantMemories = findRelevantMemories(userMessage, allMemories)
+        Napier.d(tag = "CognitiveFunnel") { "Step 1b | Relevant Memories Retrieved:\n$relevantMemories" }
 
-        // We dynamically build the system prompt from the structured profile for every message.
+        // 1c. Get Stylistic Advice for this specific turn.
+        val styleAdvice = styleAdvisor.advise(profile)
+        Napier.d(tag = "CognitiveFunnel") { "Step 1c | Style Advice: $styleAdvice" }
+
+        // --- STEP 2: DYNAMIC PROMPT ASSEMBLY ---
         val dynamicSystemPrompt = buildString {
-            appendLine("You are an AI emulating a person named '${profile.coreIdentity.name}'. You MUST adopt their personality and communication style. Follow these instructions precisely.")
-            appendLine("\n### Core Identity & Context")
-            appendLine("- Your relationship to the user is: ${profile.coreIdentity.relationshipToUser}")
-            appendLine("- Your general life situation is: ${profile.coreIdentity.dailyLifeSummary}")
-
-            appendLine("\n### Behavioral Directives (Strict Rules)")
-            appendLine("- Message Length Rule: ${profile.communicationRules.averageMessageLength}")
-            appendLine("- Tone Rule: ${profile.communicationRules.tone}")
-            appendLine("- Capitalization Rule: ${profile.communicationRules.capitalizationStyle}")
-            appendLine("- Punctuation Rule: ${profile.communicationRules.punctuationStyle}")
-            appendLine("- Emoji Frequency Rule: ${profile.communicationRules.emojiFrequency}")
-
-            appendLine("\n### Lexicon (Use these specific words and emojis)")
-            appendLine("- Signature Phrases to use: ${profile.lexicon.signaturePhrases.joinToString(", ")}")
-            appendLine("- Terms of Endearment to use: ${profile.lexicon.termsOfEndearment.joinToString(", ")}")
-            appendLine("- Preferred Emojis: ${profile.lexicon.topEmojis.joinToString(" ")}")
+            appendLine("You are an AI emulating '${profile.coreIdentity.name}'. You MUST adopt their personality and communication style. Your goal is a natural, in-character response.")
+            appendLine("\n### BRIEFING FOR THIS REPLY:")
+            appendLine("- The user's current mood seems: ${emotionAnalysis.mood} (Urgency: ${emotionAnalysis.urgency})")
+            appendLine("- Your stylistic advice is: Tone should be '${styleAdvice.tone}'. Length should be '${styleAdvice.length}'.")
 
             if (relevantMemories.isNotBlank()) {
                 appendLine("\n### RELEVANT MEMORIES (FOR CONTEXT):")
-                appendLine("Here are some relevant snippets from past conversations to inform your reply. Do not mention that these are memories; just use the information naturally.")
+                appendLine("Subtly weave information from these past conversations into your reply if it feels natural. DO NOT explicitly say 'I remember when...'.")
                 append(relevantMemories)
             }
         }
 
-        val conversationalPrompt = prompt("echo-chat-rag") {
+        val conversationalPrompt = prompt("cognitive-chat-prompt") {
             system(dynamicSystemPrompt)
-            history.takeLast(20).forEach { message ->
+            history.takeLast(10).forEach { message ->
                 if (message.isFromUser) user(message.text) else assistant(message.text)
             }
             user(userMessage)
         }
 
-        // 4. We call 'executeAndGetContent', which is the simplest text-in, text-out function.
-        //    It avoids tool-calling and returns a plain String.
-        val aiText = geminiExecutor.execute(
+        Napier.d(tag = "CognitiveFunnel") { "Step 2 | Final System Prompt:\n$dynamicSystemPrompt" }
+
+        // --- STEP 3: GENERATE RESPONSE ---
+        var aiText = geminiExecutor.execute(
             prompt = conversationalPrompt,
-            model = mainModel,
+            model = GoogleModels.Gemini1_5ProLatest,
             tools = emptyList()
-        ).getOrNull(0)?.content ?: "No Message"
+        ).getOrNull(0)?.content ?: "No Content"
+
+        Napier.d(tag = "CognitiveFunnel") { "Step 3 | Raw AI Response: '$aiText'" }
+
+        // --- STEP 4: PROBABILISTIC DECISION (CORRECTED LOGGING) ---
+        val emojiRoll = randomFloat()
+        // This regex is a standard way to detect most common emojis.
+        val emojiRegex = Regex("\\p{So}")
+        // Check if the AI's raw response contains ANY emoji.
+        val alreadyHasEmoji = emojiRegex.containsMatchIn(aiText)
+
+        if (!alreadyHasEmoji && emojiRoll < styleAdvice.emojiProbability && profile.lexicon.topEmojis.isNotEmpty()) {
+            val emojiToAdd = profile.lexicon.topEmojis.random()
+            aiText += " $emojiToAdd"
+            Napier.d(tag = "CognitiveFunnel") { "Step 4 | Emoji check PASSED (rolled $emojiRoll < ${styleAdvice.emojiProbability} AND no emoji present). Added: $emojiToAdd" }
+        } else {
+            val reason = if (alreadyHasEmoji) "AI already added one" else "rolled $emojiRoll >= ${styleAdvice.emojiProbability}"
+            Napier.d(tag = "CognitiveFunnel") { "Step 4 | Emoji check SKIPPED ($reason)." }
+        }
 
         return Message(
             text = aiText,
@@ -75,6 +106,7 @@ class KoogChatRepository(
 
     /**
      * A sub-agent that uses an LLM to perform a semantic search over the memory bank.
+     * This is the "Retrieval" part of RAG.
      */
     private suspend fun findRelevantMemories(userQuery: String, memoryBank: List<String>): String {
         if (memoryBank.isEmpty()) return ""
@@ -101,8 +133,8 @@ class KoogChatRepository(
                 system(systemPrompt)
                 user(userPrompt)
             },
-            model = mainModel,
+            model = GoogleModels.Gemini1_5FlashLatest,
             tools = emptyList()
-        ).getOrNull(0)?.content ?: "No Message"
+        ).getOrNull(0)?.content ?: "No Content"
     }
 }

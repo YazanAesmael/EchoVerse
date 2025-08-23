@@ -50,4 +50,6 @@ dependencies {
 
     // The Koin dependency for Android-specific setup.
     implementation(libs.koin.android)
+
+    implementation(libs.napier)
 }

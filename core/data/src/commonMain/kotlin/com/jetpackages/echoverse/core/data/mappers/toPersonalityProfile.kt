@@ -1,9 +1,9 @@
 package com.jetpackages.echoverse.core.data.mappers
 
-import com.jetpackages.echoverse.core.domain.model.CommunicationRules
-import com.jetpackages.echoverse.core.domain.model.CoreIdentity
-import com.jetpackages.echoverse.core.domain.model.Lexicon
-import com.jetpackages.echoverse.core.domain.model.PersonalityProfile
+import model.CommunicationRules
+import model.CoreIdentity
+import model.Lexicon
+import model.PersonalityProfile
 import com.jetpackages.echoverse.db.PersonalityProfileEntity
 
 // A helper to safely split comma-separated strings into lists

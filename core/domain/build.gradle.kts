@@ -1,6 +1,7 @@
 plugins {
     alias(libs.plugins.kotlinMultiplatform)
     alias(libs.plugins.androidLibrary)
+    alias(libs.plugins.kotlinSerialization)
 }
 
 android {
@@ -26,6 +27,7 @@ kotlin {
     sourceSets {
         commonMain.dependencies {
             api(libs.kotlinx.coroutines.core)
+            api(libs.kotlinx.serialization.core)
         }
     }
 }

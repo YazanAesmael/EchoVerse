@@ -45,6 +45,8 @@ kotlin {
             implementation(libs.koog.google.client.jvm)
 
             implementation(libs.koin.core)
+
+            implementation(libs.napier) // logging
         }
     }
 }

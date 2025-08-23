@@ -5,7 +5,7 @@ package com.jetpackages.echoverse.core.data.database
 import app.cash.sqldelight.db.SqlDriver
 import com.jetpackages.echoverse.db.EchoVerseDatabase
 
-const val DB_NAME = "echoverse.db"
+const val DB_NAME = "echoverse_v2.db"
 
 /**
  * An expected factory for creating a platform-specific SQLDriver.

@@ -2,7 +2,7 @@ package com.jetpackages.echoverse.feature.home.chat
 
 import com.arkivanov.decompose.ComponentContext
 import com.arkivanov.essenty.lifecycle.doOnCreate
-import com.jetpackages.echoverse.core.domain.model.PersonalityProfile
+import model.PersonalityProfile
 import com.jetpackages.echoverse.feature.home.chat.ui.ChatComponent
 import com.jetpackages.echoverse.feature.home.chat.ui.ChatState
 import kotlinx.coroutines.CoroutineScope

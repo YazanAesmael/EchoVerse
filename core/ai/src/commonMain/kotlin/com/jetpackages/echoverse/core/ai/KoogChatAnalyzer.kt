@@ -8,10 +8,11 @@ import ai.koog.prompt.structure.json.JsonSchemaGenerator
 import ai.koog.prompt.structure.json.JsonStructuredData
 import com.jetpackages.echoverse.core.ai.schema.ParticipantListSchema
 import com.jetpackages.echoverse.core.ai.schema.StructuredProfileSchema
-import com.jetpackages.echoverse.core.domain.model.CommunicationRules
-import com.jetpackages.echoverse.core.domain.model.CoreIdentity
-import com.jetpackages.echoverse.core.domain.model.Lexicon
-import com.jetpackages.echoverse.core.domain.model.PersonalityProfile
+import io.github.aakira.napier.Napier
+import model.CommunicationRules
+import model.CoreIdentity
+import model.Lexicon
+import model.PersonalityProfile
 import kotlinx.datetime.Clock
 import model.ChatParticipant
 import repository.ChatAnalyzer
@@ -99,7 +100,8 @@ class KoogChatAnalyzer(
             and populate a JSON object with a structured personality analysis of the participant named '$participantName'.
             Focus ONLY on messages from '$participantName'.
             Analyze their vocabulary, tone, emoji usage, and relationship to the other user to fill
-            the fields as accurately as possible. Adhere strictly to the requested JSON schema.
+            the fields as accurately as possible. Describe their communication style in terms of TENDENCIES, not strict rules.
+            Adhere strictly to the requested JSON schema.
         """.trimIndent()
 
         // Execute the agent call, requesting the new structured schema.
@@ -116,6 +118,8 @@ class KoogChatAnalyzer(
         val aiResult = result.getOrNull()?.structure
             ?: // Handle the case where the AI fails to generate a valid structure
             return createFallbackProfile(participantName, sourceChatFileName)
+
+        Napier.d(tag = "ProfileSynthesizer") { "Successfully generated structured profile:\n$aiResult" }
 
         // Map the AI's structured response into our clean domain model.
         return PersonalityProfile(

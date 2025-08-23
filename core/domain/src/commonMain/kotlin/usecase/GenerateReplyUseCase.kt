@@ -1,6 +1,6 @@
 package usecase
 
-import com.jetpackages.echoverse.core.domain.model.PersonalityProfile
+import model.PersonalityProfile
 import model.Message
 import repository.ChatRepository
 

@@ -1,6 +1,6 @@
 package repository
 
-import com.jetpackages.echoverse.core.domain.model.PersonalityProfile
+import model.PersonalityProfile
 import kotlinx.coroutines.flow.Flow
 import model.Echo
 

@@ -28,6 +28,8 @@ koog = "0.1.0"
 koogAgents = "0.2.1.41"
 agentsCore = "0.2.1.41"
 
+napier = "2.7.1"
+
 [libraries]
 # --- Kotlin ---
 kotlinx-coroutines-core = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref = "kotlinx-coroutines" }
@@ -46,7 +48,6 @@ compose-ui = { module = "org.jetbrains.compose.ui:ui", version.ref = "compose-pl
 compose-foundation = { module = "org.jetbrains.compose.foundation:foundation", version.ref = "compose-plugin" }
 compose-material3 = { module = "org.jetbrains.compose.material3:material3", version.ref = "compose-plugin" }
 compose-material-icons-extended = { module = "org.jetbrains.compose.material:material-icons-extended", version.ref = "compose-plugin" }
-compose-ui-tooling-preview = { module = "org.jetbrains.compose.ui:ui-tooling-preview", version.ref = "compose-plugin" }
 
 # --- Decompose for Navigation ---
 decompose-core = { module = "com.arkivanov.decompose:decompose", version.ref = "decompose" }
@@ -76,6 +77,8 @@ koog-agents = { module = "ai.koog:koog-agents", version.ref = "koogAgents" }
 koog-prompt = { module = "ai.koog:prompt-executor-google-client", version.ref = "koog" }
 koog-agents-jvm = { module = "ai.koog:koog-agents-jvm", version.ref = "koogAgents" }
 koog-google-client-jvm = { module = "ai.koog:prompt-executor-google-client-jvm", version.ref = "koog" }
+
+napier = { module = "io.github.aakira:napier", version.ref = "napier" }
 
 [plugins]
 androidApplication = { id = "com.android.application", version.ref = "agp" }

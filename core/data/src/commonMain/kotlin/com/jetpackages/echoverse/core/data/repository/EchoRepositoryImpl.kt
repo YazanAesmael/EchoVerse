@@ -4,7 +4,7 @@ import app.cash.sqldelight.coroutines.asFlow
 import app.cash.sqldelight.coroutines.mapToList
 import com.jetpackages.echoverse.core.data.mappers.toEcho
 import com.jetpackages.echoverse.core.data.mappers.toPersonalityProfile
-import com.jetpackages.echoverse.core.domain.model.PersonalityProfile
+import model.PersonalityProfile
 import com.jetpackages.echoverse.db.EchoVerseDatabase
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
