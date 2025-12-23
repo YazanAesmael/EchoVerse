@@ -61,28 +61,6 @@ The project is fully configured and ready to build.
 *   Xcode and its Command Line Tools (for building the iOS target)
 *   A Google AI API Key for the Gemini model.
 
-### Installation & Setup
-
-1.  **Clone the repository:**
-    ```bash
-    git clone [your-repo-url]
-    ```
-
-2.  **Get your API Key:**
-    *   Visit the [Google AI for Developers](https://ai.google.dev/) page to generate your free API key.
-
-3.  **Add your API Key:**
-    *   In the root of the project, create a file named `local.properties` (this file is already in `.gitignore`).
-    *   Add your API key to this file. The key name must be exact:
-        ```properties
-        GEMINI_API_KEY="YOUR_API_KEY_HERE"
-        ```
-
-4.  **Build and Run:**
-    *   Open the project in Android Studio.
-    *   Wait for Gradle to sync all the modules and dependencies.
-    *   Select the `androidApp` configuration and run it on an emulator or a physical device.
-
 ## ✅ Project Status (Current)
 
 The full MVP loop is complete and functional on Android.
