@@ -11,8 +11,8 @@ import org.koin.dsl.module
 import repository.ChatAnalyzer
 import repository.ChatRepository
 
-const val GEMINI_API_KEY = "AIzaSyDiAuLubCNOg6xMxDiFvlCMvRUopSkhmDg"
-const val OPEN_AI_API_KEY = "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"
+const val GEMINI_API_KEY = "GEMINI_API_KEY"
+const val OPEN_AI_API_KEY = "OPEN_AI_API_KEY"
 
 val aiModule = module {
     val googleExecutor = simpleGoogleAIExecutor(GEMINI_API_KEY)
