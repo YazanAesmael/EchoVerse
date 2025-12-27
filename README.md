@@ -1,4 +1,4 @@
-# 🧠 EchoVerse - A Deeply Personal AI Companion
+# EchoVerse - A Deeply Personal AI Companion
 
 [![Kotlin](https://img.shields.io/badge/Kotlin-2.0.20-blue.svg?logo=kotlin)](https://kotlinlang.org)
 [![Compose Multiplatform](https://img.shields.io/badge/Compose-Multiplatform-brightgreen.svg?logo=jetpackcompose)](https://www.jetbrains.com/lp/compose-multiplatform/)
@@ -10,24 +10,24 @@ This is a private repository for the development of EchoVerse, a KMM application
 
 ---
 
-## ✨ Core Concept & How It Works
+## Core Concept & How It Works
 
 The primary goal of EchoVerse is to experience a new form of connection by interacting with an AI that genuinely feels and sounds like a specific person, based on their real conversations. This is achieved through a sophisticated, multi-stage AI workflow:
 
-1.  **📥 Ingestion & Pre-Analysis**: A user exports a chat log (e.g., from WhatsApp) and shares it with EchoVerse. A lightweight Koog agent runs to extract the names of the participants.
-2.  **🧬 Personality Synthesis**: After the user selects a participant, a powerful Koog agent performs a deep analysis of their messages. It doesn't just summarize; it generates a structured **Personality Profile**, capturing everything from tone and emoji frequency to signature slang and the nature of their relationship with the user.
-3.  **💬 Dynamic Chat Interaction**: When the user chats with an Echo, a third Koog agent comes online. For every single message, it performs a **"Dynamic Context Funnel"**:
+1.  **Ingestion & Pre-Analysis**: A user exports a chat log (e.g., from WhatsApp) and shares it with EchoVerse. A lightweight Koog agent runs to extract the names of the participants.
+2.  **Personality Synthesis**: After the user selects a participant, a powerful Koog agent performs a deep analysis of their messages. It doesn't just summarize; it generates a structured **Personality Profile**, capturing everything from tone and emoji frequency to signature slang and the nature of their relationship with the user.
+3.  **Dynamic Chat Interaction**: When the user chats with an Echo, a third Koog agent comes online. For every single message, it performs a **"Dynamic Context Funnel"**:
     *   It uses the static **Personality Profile** as its core DNA.
     *   It retrieves relevant **long-term memories** from a local database (RAG).
     *   It considers the **short-term history** of the current conversation.
     *   It uses this rich, multi-layered context to generate a reply that is nuanced, in-character, and feels alive.
 
-## 🏗️ Architectural Overview
+# Architectural Overview
 
 This project is MultiPlatform built on a feature-based, multi-module clean architecture. This ensures high cohesion, low coupling, and makes the codebase easy to maintain and scale.
 
 
-## 🛠️ Tech Stack & Key Libraries
+## Tech Stack & Key Libraries
 
 *   **Platform**: Kotlin Multiplatform Mobile (KMM)
 *   **UI**: Compose Multiplatform (for both Android & iOS)
@@ -39,7 +39,7 @@ This project is MultiPlatform built on a feature-based, multi-module clean archi
 *   **Database**: SQLDelight
 *   **Networking**: Ktor
 
-## 🚀 Getting Started
+## Getting Started
 
 The project is fully configured and ready to build.
 
@@ -59,11 +59,6 @@ The project is fully configured and ready to build.
     *   Visit the [Google AI for Developers](https://ai.google.dev/) page to generate your free API key.
 
 3.  **Add your API Key:**
-    *   In the root of the project, create a file named `local.properties` (this file is already in `.gitignore`).
-    *   Add your API key to this file. The key name must be exact:
-        ```properties
-        GEMINI_API_KEY="YOUR_API_KEY_HERE"
-        ```
 
 4.  **Build and Run:**
     *   Open the project in Android Studio.
@@ -79,3 +74,4 @@ The full MVP loop is complete and functional on Android.
 *   ✅ **Phase 2 (Living Memory):** The data layer is equipped to store and retrieve both persistent chat history and long-term "episodic" memories. The chat agent is using the RAG pattern to recall context.
 *   ✅ Full navigation between the Home, Create Echo, and Chat screens is implemented with Decompose.
 *   ✅ Chatting with an Echo is fully functional.
+*   ✅ Full DB Integration.
