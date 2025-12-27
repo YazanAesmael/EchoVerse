@@ -24,20 +24,7 @@ The primary goal of EchoVerse is to experience a new form of connection by inter
 
 ## 🏗️ Architectural Overview
 
-This project is built on a feature-based, multi-module clean architecture. This ensures high cohesion, low coupling, and makes the codebase easy to maintain and scale.
-
-EchoVerse/
-├── 📁 androidApp/ # Thin Android application launcher
-├── 📁 iosApp/ # Thin iOS application launcher
-│
-├── 📁 feature/
-│ └── 📁 home/ # Contains the complete Home/Chat/CreateEcho UI and logic
-│
-└── 📁 core/
-├── 📁 ai/ # Koog agent implementations (The "AI Engine")
-├── 📁 data/ # Repository implementations, SQLDelight database
-├── 📁 domain/ # Pure Kotlin business logic (Entities, Interfaces, Use Cases)
-└── 📁 ui/ # Shared Compose UI components & EchoVerseTheme
+This project is MultiPlatform built on a feature-based, multi-module clean architecture. This ensures high cohesion, low coupling, and makes the codebase easy to maintain and scale.
 
 
 ## 🛠️ Tech Stack & Key Libraries
@@ -92,22 +79,3 @@ The full MVP loop is complete and functional on Android.
 *   ✅ **Phase 2 (Living Memory):** The data layer is equipped to store and retrieve both persistent chat history and long-term "episodic" memories. The chat agent is using the RAG pattern to recall context.
 *   ✅ Full navigation between the Home, Create Echo, and Chat screens is implemented with Decompose.
 *   ✅ Chatting with an Echo is fully functional.
-
-## 🗺️ Future Roadmap
-
-The foundation is built. The next steps focus on polishing the user experience and expanding the "magic."
-
-*   [ ] **Phase 1: Immediate Polish**
-    *   [ ] Refine the Chat UI (realistic typing delays, better chat bubbles).
-    *   [ ] Build a polished "Create Echo" loading screen to visualize the AI's "thinking" process.
-    *   [ ] Implement a proper first-time user onboarding flow.
-*   [ ] **Phase 2: Mid-Term Magic**
-    *   [ ] Implement the thin `iosApp` UI layer with SwiftUI.
-    *   [ ] Build an "Echo Memories" screen for users to browse the AI's long-term memory.
-    *   [ ] Add image/media support to the chat.
-*   [ ] **Phase 3: Long-Term Vision**
-    *   [ ] Explore Voice Echos using TTS.
-    *   [ ] Investigate and implement on-device AI models for a "Maximum Privacy Mode."
-    *   [ ] Expand to support Group Chat Echos.
-
----
